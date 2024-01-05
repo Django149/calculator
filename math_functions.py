@@ -1,3 +1,6 @@
+import math
+
+
 def add(x: int | float, y: int | float) -> int | float:
     """
     Adds two numbers
@@ -34,8 +37,12 @@ def divide(x: int | float, y: int | float) -> float:
     :param x: Numerator
     :param y: Denominator
     :return: Quotient of x and y
+    :raises ZeroDivisionError: If 'y' is zero
     """
-    return x / y
+    try:
+        return x / y
+    except ZeroDivisionError:
+        raise ZeroDivisionError("Cannot divide by zero")
 
 
 def power(x: int | float, y: int | float) -> float:
@@ -45,17 +52,22 @@ def power(x: int | float, y: int | float) -> float:
     :param y: Exponent
     :return: x raised to the power of y
     """
-    return x ** y
+    return math.pow(x, y)
 
 
-def modulus(x: int, y: int) -> int:
+def modulus(x: int | float, y: int | float) -> float:
+
     """
     Calculates the modulus of two numbers
     :param x: First number
     :param y: Second number
     :return: Remainder of x divided by y
+    :raises ZeroDivisionError: If 'y' is zero
     """
-    return x % y
+    try:
+        return x % y
+    except ZeroDivisionError:
+        raise ZeroDivisionError("Cannot modulo by zero")
 
 
 def average(x: int | float, y: int | float) -> float:
@@ -107,6 +119,12 @@ def factorial(x: int) -> int:
     :param x: Number to find the factorial of
     :return: Factorial of x
     """
+    if not isinstance(x, int):
+        raise TypeError("Factorial is only for integers")
+    if x < 0:
+        raise ValueError("Factorial is not defined for negative values")
+    if x < 0:
+        raise
     if x == 0 or x == 1:
         return 1
     result = 1
