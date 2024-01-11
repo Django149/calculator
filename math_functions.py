@@ -56,7 +56,6 @@ def power(x: int | float, y: int | float) -> float:
 
 
 def modulus(x: int | float, y: int | float) -> float:
-
     """
     Calculates the modulus of two numbers
     :param x: First number
@@ -118,16 +117,35 @@ def factorial(x: int) -> int:
     Calculates the factorial of a number
     :param x: Number to find the factorial of
     :return: Factorial of x
+    :raises TypeError: If 'x' is not an integer
+    :raises ValueError: If 'x' is negative
     """
     if not isinstance(x, int):
-        raise TypeError("Factorial is only for integers")
+        raise TypeError("Factorial is defined only for integers")
     if x < 0:
         raise ValueError("Factorial is not defined for negative values")
-    if x < 0:
-        raise
     if x == 0 or x == 1:
         return 1
     result = 1
     for i in range(2, x + 1):
         result *= i
     return result
+
+
+def sum_of_digits(x: int | float) -> int:
+    """
+    Calculates the sum of the digits of a number
+    :param x: Number to find the sum of digits
+    :return: Sum of the digits of the number
+    :raises ValueError: If 'x' is not positive
+    """
+    if x <= 0:
+        raise ValueError("'#' operator is defined only for positive values")
+    if isinstance(x, float):
+        x_without_point = str(x).replace('.', '')
+        x = int(x_without_point)
+    digits_sum = 0
+    while x != 0:
+        digits_sum += x % 10
+        x //= 10
+    return digits_sum
