@@ -183,11 +183,20 @@ def get_number(expression: str, index: int) -> tuple[int, int]:
     :param expression: The expression to find the number in
     :param index: The index where the number is starts
     :return: A tuple containing the number and the index to proceed from
-    :raises InvalidNumberFormatError: If the number contains more than one decimal point
+    :raises InvalidNumberFormatError: If the number contains more than one decimal point or if a decimal point is not
+    followed or preceded by a digit
     """
     number_ended = False
     dot_appeared = False
     number = expression[index]
+
+    if number == '.':
+        if index + 1 < len(expression) and expression[index + 1].isdigit():
+            number = '0.'
+            dot_appeared = True
+        else:
+            raise InvalidNumberFormatError("A decimal point must be followed or preceded by a digit")
+
     index += 1
     while index < len(expression) and not number_ended:
         char = expression[index]
@@ -255,7 +264,7 @@ def evaluate_expression(expression: str) -> int | float:
         if char == ' ' or char == '\t':
             pass
 
-        elif char.isdigit():
+        elif char.isdigit() or char == '.':
             number, index = handle_number(operand_stack, expression, index, previous)
             previous = number
 
