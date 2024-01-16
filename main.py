@@ -4,7 +4,7 @@ from operators import BinaryOperator, RightUnaryOperator, LeftUnaryOperator, Una
 from math_functions import *
 
 OPERATORS = {"+": BinaryOperator(1, add), "-": BinaryOperator(1, subtract), "*": BinaryOperator(2, multiply),
-             "/": BinaryOperator(2, divide), "^": BinaryOperator(3, power), "unaryMinus": LeftUnaryOperator(3, negate),
+             "/": BinaryOperator(2, divide), "^": BinaryOperator(3, power), "unaryMinus": LeftUnaryOperator(1, negate),
              "%": BinaryOperator(4, modulus),
              "@": BinaryOperator(5, average),
              "$": BinaryOperator(5, maximum), "&": BinaryOperator(5, minimum), "~": LeftUnaryOperator(6, negate),
@@ -64,6 +64,22 @@ def is_binary_operator(item: str | int | float) -> bool:
     :return: True if item is a binary operator, False otherwise
     """
     return is_operator(item) and isinstance(OPERATORS[item], BinaryOperator)
+
+
+def handle_right_parenthesis(operator_stack: list[str], operand_stack: list[int | float]):
+    """
+    Handles the expression between the recent left parenthesis and the current right parenthesis
+    :param operand_stack: list of operands
+    :param operator_stack: list of operators
+    :raises InsufficientOperatorsError: If there are mismatched parentheses (can be raised from execute_operation)
+    :raises InsufficientOperandsError: If the execute_operation function raises this exception
+    :raises InvalidUseOfOperatorError: If the execute_operation function raises this exception
+    """
+    while operator_stack and operator_stack[-1] != '(':
+        execute_operation(operand_stack, operator_stack)
+    if not operator_stack:
+        raise InsufficientOperatorsError("Mismatched parentheses")
+    operator_stack.pop()
 
 
 def execute_operation(operand_stack: list[int | float], operator_stack: list[str]):
@@ -132,8 +148,9 @@ def handle_operator(operator_stack: list[str], operand_stack: list[int | float],
     :raises InsufficientOperandsError: If the execute_operation function raises this exception
     :raises InsufficientOperatorsError: If the execute_operation function raises this exception
     """
-    if is_left_unary_operator(previous) and operator != '-':
-        raise InvalidUseOfOperatorError(f"Operator '{previous}' needs to be next to a number")
+    if is_left_unary_operator(previous) and operator != '-' and operator_stack and operator_stack[-1] != "(" and \
+            operator_stack[-1] != ")":
+        raise InvalidUseOfOperatorError(f"Operator '{previous}' needs to be next to a number or parentheses")
 
     if operator == '-':
         if previous is None:
@@ -245,6 +262,12 @@ def evaluate_expression(expression: str) -> int | float:
         elif is_operator(char):
             handle_operator(operator_stack, operand_stack, char, previous)
             previous = operator_stack[-1]
+
+        elif char == '(':
+            operator_stack.append(char)
+
+        elif char == ')':
+            handle_right_parenthesis(operator_stack, operand_stack)
 
         else:
             raise UnknownCharacterError(f"Invalid character encountered: {char}")
