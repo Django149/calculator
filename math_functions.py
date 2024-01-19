@@ -51,8 +51,12 @@ def power(x: int | float, y: int | float) -> float:
     :param x: Base
     :param y: Exponent
     :return: x raised to the power of y
+    :raises ValueError: If a negative number is raised to a fractional power
     """
-    return math.pow(x, y)
+    try:
+        return math.pow(x, y)
+    except ValueError:
+        raise ValueError("Cannot raise a negative number to a fractional power")
 
 
 def modulus(x: int | float, y: int | float) -> float:

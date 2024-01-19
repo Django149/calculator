@@ -139,7 +139,7 @@ def execute_operation(operand_stack: list[int | float], operator_stack: list[str
 
         try:
             num = func(operand1, operand2)
-        except ZeroDivisionError as e:
+        except (ZeroDivisionError, ValueError) as e:
             raise InvalidUseOfOperatorError(e)
 
         if isinstance(num, float) and num.is_integer():
@@ -330,6 +330,8 @@ def handle_expression(expression: str):
     except (InsufficientOperandsError, InvalidNumberFormatError, UnknownCharacterError, InsufficientOperatorsError,
             InvalidUseOfOperatorError) as e:
         print(f"{e.__class__.__name__}: {e}")
+    except ValueError:
+        print(f"ValueError: The result of the expression is too big")
     except Exception as e:
         print("Unexpected error: ", e)
 
