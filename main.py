@@ -12,6 +12,15 @@ OPERATORS = {"+": BinaryOperator(1, add), "-": BinaryOperator(1, subtract), "*":
              "numberMinus": LeftUnaryOperator(10, negate)}
 
 
+def is_top_left_parenthesis(operator_stack: list[str]):
+    """
+    Checks if the top of the stack is a left parenthesis
+    :param operator_stack: list of operators
+    :return: True if the top of the stack is a left parenthesis, False otherwise
+    """
+    return operator_stack and operator_stack[-1] == "("
+
+
 def is_number(item: str | int | float) -> bool:
     """
     Checks if the item is a number (integer or float)
@@ -66,16 +75,20 @@ def is_binary_operator(item: str | int | float) -> bool:
     return is_operator(item) and isinstance(OPERATORS[item], BinaryOperator)
 
 
-def handle_right_parenthesis(operator_stack: list[str], operand_stack: list[int | float]):
+def handle_right_parenthesis(operator_stack: list[str], operand_stack: list[int | float],
+                             is_previous_left_parenthesis: bool):
     """
     Handles the expression between the recent left parenthesis and the current right parenthesis
     :param operand_stack: list of operands
     :param operator_stack: list of operators
+    :param is_previous_left_parenthesis: A boolean indicating if the previous character is a left parenthesis
     :raises InsufficientOperatorsError: If there are mismatched parentheses (can be raised from execute_operation)
     :raises InsufficientOperandsError: If the execute_operation function raises this exception
     :raises InvalidUseOfOperatorError: If the execute_operation function raises this exception
     """
-    while operator_stack and operator_stack[-1] != '(':
+    if is_previous_left_parenthesis:
+        raise InvalidUseOfOperatorError("Empty parentheses")
+    while operator_stack and not is_top_left_parenthesis(operator_stack):
         execute_operation(operand_stack, operator_stack)
     if not operator_stack:
         raise InsufficientOperatorsError("Mismatched parentheses")
@@ -136,24 +149,24 @@ def execute_operation(operand_stack: list[int | float], operator_stack: list[str
 
 
 def handle_operator(operator_stack: list[str], operand_stack: list[int | float], operator: str,
-                    previous: str | int | float):
+                    previous: str | int | float, is_previous_left_parenthesis: bool):
     """
     Handles the current operator in the expression and updates the operator_stack
     :param operand_stack: list of operands
     :param operator_stack: list of operators
     :param operator: The operator to process
     :param previous: The last character or number handled
+    :param is_previous_left_parenthesis: A boolean indicating if the previous character is a left parenthesis
     :raises InvalidUseOfOperatorError: If an operator is used incorrectly or if the execute_operation function raises
-    this exception
+    thisexception
     :raises InsufficientOperandsError: If the execute_operation function raises this exception
     :raises InsufficientOperatorsError: If the execute_operation function raises this exception
     """
-    if is_left_unary_operator(previous) and operator != '-' and operator_stack and operator_stack[-1] != "(" and \
-            operator_stack[-1] != ")":
+    if is_left_unary_operator(previous) and operator != '-' and not is_previous_left_parenthesis:
         raise InvalidUseOfOperatorError(f"Operator '{previous}' needs to be next to a number or parentheses")
 
     if operator == '-':
-        if previous is None:
+        if previous is None or is_previous_left_parenthesis:
             operator = "unaryMinus"
         elif not is_right_unary_operator(previous) and not is_number(previous):
             if previous == "unaryMinus":
@@ -161,17 +174,26 @@ def handle_operator(operator_stack: list[str], operand_stack: list[int | float],
             else:
                 operator = "numberMinus"
 
-    if is_right_unary_operator(operator) and not (is_number(previous) or is_right_unary_operator(previous)):
-        raise InvalidUseOfOperatorError(f"Operator '{operator}' should be to the right of a number")
+    if is_right_unary_operator(operator):
+        if is_previous_left_parenthesis or not (is_number(previous) or is_right_unary_operator(previous)):
+            raise InvalidUseOfOperatorError(f"Operator '{operator}' should be to the right of a number")
 
     if is_left_unary_operator(operator):
         if is_number(previous) or is_right_unary_operator(previous):
-            raise InvalidUseOfOperatorError(f"Operator '{operator}' should be to the left of a number")
+            if is_previous_left_parenthesis:
+                raise InsufficientOperatorsError("Not enough operators for a binary operation")
+            else:
+                raise InvalidUseOfOperatorError(f"Operator '{operator}' should be to the left of a number")
+
         operator_stack.append(operator)
         return
 
-    while operator_stack and operator_stack[-1] != '(' and OPERATORS[operator_stack[-1]].get_precedence() >= \
-            OPERATORS[operator].get_precedence():
+    if is_binary_operator(operator):
+        if is_previous_left_parenthesis:
+            raise InsufficientOperandsError(f"Not enough operands for binary operation ('{operator}')")
+
+    while operator_stack and not is_top_left_parenthesis(operator_stack) and OPERATORS[
+        operator_stack[-1]].get_precedence() >= OPERATORS[operator].get_precedence():
         execute_operation(operand_stack, operator_stack)
 
     operator_stack.append(operator)
@@ -258,25 +280,31 @@ def evaluate_expression(expression: str) -> int | float:
     operator_stack = []
     index = 0
     previous = None
+    is_previous_left_parenthesis = False
     while index < len(expression):
         char = expression[index]
 
         if char == ' ' or char == '\t':
             pass
+            is_previous_left_parenthesis = False
 
         elif char.isdigit() or char == '.':
             number, index = handle_number(operand_stack, expression, index, previous)
             previous = number
+            is_previous_left_parenthesis = False
 
         elif is_operator(char):
-            handle_operator(operator_stack, operand_stack, char, previous)
+            handle_operator(operator_stack, operand_stack, char, previous, is_previous_left_parenthesis)
             previous = operator_stack[-1]
+            is_previous_left_parenthesis = False
 
         elif char == '(':
             operator_stack.append(char)
+            is_previous_left_parenthesis = True
 
         elif char == ')':
-            handle_right_parenthesis(operator_stack, operand_stack)
+            handle_right_parenthesis(operator_stack, operand_stack, is_previous_left_parenthesis)
+            is_previous_left_parenthesis = False
 
         else:
             raise UnknownCharacterError(f"Invalid character encountered: {char}")
@@ -302,6 +330,8 @@ def handle_expression(expression: str):
     except (InsufficientOperandsError, InvalidNumberFormatError, UnknownCharacterError, InsufficientOperatorsError,
             InvalidUseOfOperatorError) as e:
         print(f"{e.__class__.__name__}: {e}")
+    except Exception as e:
+        print("Unexpected error: ", e)
 
 
 def main():
