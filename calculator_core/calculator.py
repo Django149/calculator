@@ -118,6 +118,7 @@ def execute_operation(operand_stack: list[int | float], operator_stack: list[str
     :raises InvalidUseOfOperatorError: If an operator is used incorrectly
     :raises InsufficientOperatorsError: If there are mismatched parentheses
     """
+    num = None
     operator = operator_stack.pop()
     if operator == '(':
         raise InsufficientOperatorsError("Mismatched parentheses")
@@ -136,10 +137,9 @@ def execute_operation(operand_stack: list[int | float], operator_stack: list[str
             num = func(operand)
         except (ValueError, TypeError) as e:
             raise InvalidUseOfOperatorError(e)
+
         if isinstance(num, float) and num.is_integer():
             num = int(num)
-
-        operand_stack.append(num)
 
     else:
         if len(operand_stack) < 2:
@@ -159,7 +159,7 @@ def execute_operation(operand_stack: list[int | float], operator_stack: list[str
         if isinstance(num, float) and num.is_integer():
             num = int(num)
 
-        operand_stack.append(num)
+    operand_stack.append(round(num, 10))
 
 
 def handle_operator(operator_stack: list[str], operand_stack: list[int | float], operator: str,
