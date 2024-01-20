@@ -56,7 +56,10 @@ def power(x: int | float, y: int | float) -> float:
     try:
         return math.pow(x, y)
     except ValueError:
-        raise ValueError("Cannot raise a negative number to a fractional power")
+        if x == 0 and y < 0:
+            raise ValueError("Cannot raise zero to a negative power")
+        else:
+            raise ValueError("Cannot raise a negative number to a fractional power")
 
 
 def modulus(x: int | float, y: int | float) -> float:
