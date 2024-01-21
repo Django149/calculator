@@ -149,7 +149,8 @@ def sum_of_digits(x: int | float) -> int:
     if x <= 0:
         raise ValueError("'#' operator is defined only for positive values")
     if isinstance(x, float):
-        x_without_point = str(x).replace('.', '')
+        x_decimal_format = format(x, '.10f')
+        x_without_point = x_decimal_format.replace('.', '')
         x = int(x_without_point)
     digits_sum = 0
     while x != 0:
