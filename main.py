@@ -27,13 +27,14 @@ def main():
     """
     Main function that gets and processes the user's input
     """
-    while True:
+    flag = True
+    while flag:
         try:
             expression = input('Enter an expression: ')
-        except EOFError as e:
-            print(e)
-            continue
-        handle_expression(expression)
+            handle_expression(expression)
+        except (EOFError, KeyboardInterrupt):
+            print("Exiting Calculator...")
+            flag = False
 
 
 if __name__ == '__main__':
