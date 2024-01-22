@@ -37,7 +37,7 @@ def main():
         try:
             expression = input('Enter an expression: ')
             handle_expression(expression)
-        except (EOFError, KeyboardInterrupt):
+        except EOFError:
             print("Exiting Calculator...")
             flag = False
 
