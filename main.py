@@ -14,14 +14,18 @@ def handle_expression(expression: str):
     :param expression: The expression to handle
     """
     try:
-        print(evaluate_expression(expression))
+        res = evaluate_expression(expression)
+        if 'e' in str(float(res)):
+            print(float(res))
+        else:
+            print(res)
     except (InsufficientOperandsError, InvalidNumberFormatError, UnknownCharacterError, InsufficientOperatorsError,
             InvalidUseOfOperatorError, InvalidValueForOperatorError) as e:
         print(f"{e.__class__.__name__}: {e}")
-    except ValueError:
-        print(f"ValueError: The result of the expression is too big")
+    except (ValueError, OverflowError) as e:
+        print(f"{e.__class__.__name__}: The result of the expression is too big")
     except Exception as e:
-        print("Unexpected error: ", e)
+        print(f"Unexpected error: {e.__class__.__name__}, {e}")
 
 
 def main():
