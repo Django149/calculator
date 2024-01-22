@@ -4,6 +4,7 @@ from calculator_core.calculator_errors.insufficient_operands_error import Insuff
 from calculator_core.calculator_errors.unknown_character_error import UnknownCharacterError
 
 from operators.operator_errors.invalid_use_of_operator_error import InvalidUseOfOperatorError
+from operators.operator_errors.invalid_value_for_operator_error import InvalidValueForOperatorError
 
 from operators.operator_implementations.unary_operators.left_unary_operator import LeftUnaryOperator
 from operators.operator_implementations.unary_operators.right_unary_operator import RightUnaryOperator
@@ -86,7 +87,7 @@ def handle_right_parenthesis(operator_stack: list[str], operand_stack: list[int 
     :param is_previous_left_parenthesis: A boolean indicating if the previous character is a left parenthesis
     :raises InsufficientOperatorsError: If there are mismatched parentheses (can be raised from execute_operation)
     :raises InsufficientOperandsError: If the execute_operation function raises this exception
-    :raises InvalidUseOfOperatorError: If the execute_operation function raises this exception
+    :raises InvalidValueForOperatorError: If the execute_operation function raises this exception
     """
     if is_previous_left_parenthesis:
         raise InvalidUseOfOperatorError("Empty parentheses")
@@ -103,8 +104,8 @@ def execute_operation(operand_stack: list[int | float], operator_stack: list[str
     :param operand_stack: list of operands
     :param operator_stack: list of operators
     :raises InsufficientOperandsError: If there are insufficient operands to perform a binary operation
-    :raises InvalidUseOfOperatorError: If an operator is used incorrectly
     :raises InsufficientOperatorsError: If there are mismatched parentheses
+    :raises InvalidValueForOperatorError: If an operator is given invalid value
     """
     num = None
     operator = operator_stack.pop()
@@ -124,7 +125,7 @@ def execute_operation(operand_stack: list[int | float], operator_stack: list[str
         try:
             num = func(operand)
         except (ValueError, TypeError) as e:
-            raise InvalidUseOfOperatorError(e)
+            raise InvalidValueForOperatorError(e)
 
         if isinstance(num, float) and num.is_integer():
             num = int(num)
@@ -142,7 +143,7 @@ def execute_operation(operand_stack: list[int | float], operator_stack: list[str
         try:
             num = func(operand1, operand2)
         except (ZeroDivisionError, ValueError) as e:
-            raise InvalidUseOfOperatorError(e)
+            raise InvalidValueForOperatorError(e)
 
         if isinstance(num, float) and num.is_integer():
             num = int(num)
@@ -159,8 +160,8 @@ def handle_operator(operator_stack: list[str], operand_stack: list[int | float],
     :param operator: The operator to process
     :param previous: The last character or number handled
     :param is_previous_left_parenthesis: A boolean indicating if the previous character is a left parenthesis
-    :raises InvalidUseOfOperatorError: If an operator is used incorrectly or if the execute_operation function raises
-    this exception
+    :raises InvalidUseOfOperatorError: If an operator is used incorrectly
+    :raises InvalidValueForOperatorError: If the execute_operation function raises this exception
     :raises InsufficientOperandsError: If the execute_operation function raises this exception
     :raises InsufficientOperatorsError: If the execute_operation function raises this exception
     """
@@ -277,6 +278,8 @@ def evaluate_expression(expression: str) -> int | float:
     :raises InsufficientOperatorsError: If the handle_number function raises this exception or if the handle_operator
     function raises this exception
     :raises InvalidUseOfOperatorError: If the handle_operator function raises this exception
+    :raises InvalidValueForOperatorError: If the execute_operation function raises this exception or if the
+    handle_operator function raises this exception
     """
     operand_stack = []
     operator_stack = []
