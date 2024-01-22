@@ -4,13 +4,10 @@ from operators.operator_implementations.unary_operators.right_unary_operator imp
 
 from operators.operators_math_functions import *
 
-OPERATORS = {"+": BasicBinaryOperator(1, add), "-": BasicBinaryOperator(1, subtract),
-             "*": BasicBinaryOperator(2, multiply),
+OPERATORS = {"unaryMinus": LeftUnaryOperator(1, negate), "+": BasicBinaryOperator(1, add),
+             "-": BasicBinaryOperator(1, subtract), "*": BasicBinaryOperator(2, multiply),
              "/": BasicBinaryOperator(2, divide), "^": BasicBinaryOperator(3, power),
-             "unaryMinus": LeftUnaryOperator(1, negate),
-             "%": BasicBinaryOperator(4, modulus),
-             "@": BasicBinaryOperator(5, average),
+             "%": BasicBinaryOperator(4, modulus), "@": BasicBinaryOperator(5, average),
              "$": BasicBinaryOperator(5, maximum), "&": BasicBinaryOperator(5, minimum),
-             "~": LeftUnaryOperator(6, negate),
-             "!": RightUnaryOperator(6, factorial), "#": RightUnaryOperator(6, sum_of_digits),
-             "numberMinus": LeftUnaryOperator(10, negate)}
+             "~": LeftUnaryOperator(6, negate), "!": RightUnaryOperator(6, factorial),
+             "#": RightUnaryOperator(6, sum_of_digits), "numberMinus": LeftUnaryOperator(10, negate)}
